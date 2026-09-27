@@ -1,7 +1,7 @@
 {
   "name": "@mirafive/sdk-server",
   "version": "1.0.0",
-  "description": "Send MIRA FIVE events and read feature flags from a server: Node, Bun, Deno, Cloudflare Workers and edge functions.",
+  "description": "MIRA FIVE server SDK for JS runtimes",
   "keywords": [
     "ab-testing",
     "analytics",
