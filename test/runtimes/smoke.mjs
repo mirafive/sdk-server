@@ -101,7 +101,7 @@ export async function smoke({ Mira, MiraError }, { MiraFlags, bootstrapHeaders }
     "buffered events delivered on shutdown"
   )
   assert(
-    batches.every((batch) => batch.v === 1 && batch.context.sdk === "mirafive-server/0.5.0"),
+    batches.every((batch) => batch.v === 1 && batch.context.sdk === "mirafive-server/1.0.0"),
     "envelope"
   )
   assert(

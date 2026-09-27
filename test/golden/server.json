@@ -4,7 +4,7 @@
     "mode": "full",
     "sentAt": 1790153842822,
     "context": {
-        "sdk": "mirafive-server/0.5.0"
+        "sdk": "mirafive-server/1.0.0"
     },
     "events": [
         {

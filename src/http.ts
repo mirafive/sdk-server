@@ -2,7 +2,7 @@ import { MiraError } from "./error.ts"
 
 export type Fetch = (input: string, init: RequestInit) => Promise<Response>
 
-export const SDK = "mirafive-server/0.5.0"
+export const SDK = "mirafive-server/1.0.0"
 
 export const trimHost = (host: string): string => {
   // Plain http only to this machine: the secret key travels in a header.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 — unreleased
+## 1.0.0 — unreleased
 
 Rebuilt from scratch on the v1 ingest protocol and the v1 flag spec.
 

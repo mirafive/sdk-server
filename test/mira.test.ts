@@ -52,7 +52,7 @@ describe("buffering", () => {
       v: 1,
       mode: "full",
       sentAt: 1_790_153_842_822,
-      context: { sdk: "mirafive-server/0.5.0" },
+      context: { sdk: "mirafive-server/1.0.0" },
       events: [
         { name: "a", time: 1_790_153_842_822 },
         { name: "b", properties: { plan: "pro" } },
