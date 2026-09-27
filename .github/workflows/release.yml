@@ -21,7 +21,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
-      # Trusted publishing needs npm >= 11.5.1 and Node >= 22.14.
+      # Staged publishing through a trusted publisher needs npm >= 11.15 and Node >= 22.14.
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -41,9 +41,10 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # prepublishOnly runs `bun run check`. A private package (protocol) is only checked; a version already
-      # on npm is skipped, so a rerun only redoes the release.
-      - name: Publish to npm
+      # CI can only stage: the version goes live once a maintainer approves it with 2FA on npmjs.com
+      # (`npm stage approve`). prepublishOnly runs `bun run check`. A private package (protocol) is only
+      # checked; a version already on npm is skipped, so a rerun only redoes the release.
+      - name: Stage on npm
         run: |
           name=$(node -p 'require("./package.json").name')
           if [ "$(node -p 'require("./package.json").private === true')" = true ]; then
@@ -52,7 +53,7 @@ jobs:
             echo "$name@$VERSION is already on npm"
             bun run build
           else
-            npm publish --access public
+            npm stage publish --access public
           fi
 
       - name: GitHub release
