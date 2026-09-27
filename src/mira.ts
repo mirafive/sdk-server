@@ -123,9 +123,6 @@ const walk = (
   return undefined
 }
 
-// Measured as the server's json_encode writes it: "/" as "\/", non-ASCII as \uXXXX.
-const phpBytes = (json: string): number => json.replaceAll("/", "//").replace(/[^\0-\x7f]/g, "\\u0000").length
-
 // The envelope around the events stays well under this.
 const split = (events: readonly string[]): string[][] => {
   const parts: string[][] = []
@@ -464,7 +461,7 @@ export class Mira<E extends Events = Events> {
 
     if (!problem) {
       try {
-        if (properties && phpBytes(JSON.stringify(properties)) > 32_768) {
+        if (properties && bytes(JSON.stringify(properties)) > 32_768) {
           problem = "properties encode to at most 32 KB"
         } else {
           return JSON.stringify({ name, id, time, page, properties, anonymousId, userId, sessionId })

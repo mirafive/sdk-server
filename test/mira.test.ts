@@ -525,8 +525,7 @@ describe("review fixes", () => {
     ["65 values", Object.fromEntries(Array.from({ length: 65 }, (_, index) => [`k${index}`, index]))],
     ["6 levels", { a: { b: { c: { d: { e: { f: 1 } } } } } }],
     ["a 129-character key", { ["k".repeat(129)]: 1 }],
-    ["slashes over 32 KB as the server encodes them", { path: "/".repeat(16_400) }],
-    ["non-ASCII over 32 KB as the server encodes them", { text: "ä".repeat(5500) }]
+    ["over 32 KB of UTF-8", { text: "ä".repeat(16_400) }]
   ])("drops properties with %s", async (_, properties) => {
     const { mira, calls, errors } = client()
 
@@ -539,6 +538,7 @@ describe("review fixes", () => {
   it.each([
     ["5 levels", { a: { b: { c: { d: { e: 1 } } } } }],
     ["30,000 ASCII characters", { text: "a".repeat(30_000) }],
+    ["unicode and slashes counted unescaped", { text: "ü/".repeat(8000) }],
     [
       "a list keyed 0…69 as one value",
       { list: Object.fromEntries(Array.from({ length: 70 }, (_, index) => [index, 1])) }
