@@ -1,0 +1,4874 @@
+{
+    "v": 1,
+    "level": 1,
+    "junk": [
+        "undefined",
+        "null",
+        "none",
+        "nan",
+        "0",
+        "true",
+        "false",
+        "anonymous",
+        "guest",
+        "id",
+        "email",
+        "distinct_id",
+        "distinctid",
+        "not_authenticated",
+        "[object object]"
+    ],
+    "cases": [
+        {
+            "name": "no facts: on for everyone",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "on",
+                "reason": "STATIC",
+                "rule": 0
+            }
+        },
+        {
+            "name": "no facts: no rules serve the default",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": []
+            },
+            "facts": {},
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "no facts: a disabled flag",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ],
+                "off": 1
+            },
+            "facts": {},
+            "expect": {
+                "variant": "off",
+                "reason": "DISABLED"
+            }
+        },
+        {
+            "name": "no facts: need 2 is unsupported",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ],
+                "need": 2
+            },
+            "facts": {},
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "UNSUPPORTED"
+            }
+        },
+        {
+            "name": "no facts: a fixed variant with a share is unsupported",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on",
+                        "sh": 5000
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "UNSUPPORTED"
+            }
+        },
+        {
+            "name": "no facts: an empty condition list is targeting",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "no facts: a split serves the default",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "no facts: a person split serves the default",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "p",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "no facts: a property rule falls through",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    },
+                    {
+                        "x": "off"
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "off",
+                "reason": "STATIC",
+                "rule": 1
+            }
+        },
+        {
+            "name": "no facts: unset holds",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "unset",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "no facts: in a segment does not hold",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "no facts: not in a segment does not hold",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a",
+                                1
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {},
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "on for everyone",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "STATIC",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a disabled flag serves its default",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ],
+                "off": 1
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DISABLED"
+            }
+        },
+        {
+            "name": "unsupported wins over disabled",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ],
+                "need": 2,
+                "off": 1
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "UNSUPPORTED"
+            }
+        },
+        {
+            "name": "a fixed variant with weights is unsupported",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on",
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "UNSUPPORTED"
+            }
+        },
+        {
+            "name": "a mixed rule behind a matching rule is still unsupported",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    },
+                    {
+                        "x": "on",
+                        "sh": 100
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "UNSUPPORTED"
+            }
+        },
+        {
+            "name": "the first matching rule wins",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    },
+                    {
+                        "x": "off"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a rule that does not match falls through",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    },
+                    {
+                        "x": "off"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "STATIC",
+                "rule": 1
+            }
+        },
+        {
+            "name": "no matching rule serves the default without a rule",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "experiment, counting, payload and unknown keys change nothing",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "x": "on"
+                    }
+                ],
+                "e": "r",
+                "c": "s",
+                "p": {
+                    "on": {
+                        "color": "red"
+                    },
+                    "off": {
+                        "color": "grey"
+                    }
+                },
+                "zz": 1
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "STATIC",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a split sends user_1 to a",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "a",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a split sends user_3 to b",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_3"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a share of 0 includes no one",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "sh": 0,
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_2"
+            },
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a share of 10000 includes everyone",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "sh": 10000,
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_7"
+            },
+            "expect": {
+                "variant": "a",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "share 2500 leaves user_4 out",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "sh": 2500,
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_4"
+            },
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "share 5000 takes user_4 in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "sh": 5000,
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_4"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "share 7500 keeps user_4 on its variant",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "sh": 7500,
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_4"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a unit outside the share does not fall through",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "sh": 5000,
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    },
+                    {
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a unit inside the share of the same flag",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "sh": 5000,
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    },
+                    {
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_2"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "weights below 10000 leave the rest on the default",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                3000
+                            ],
+                            [
+                                "b",
+                                3000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_3"
+            },
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "weights below 10000 still split user_2",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                3000
+                            ],
+                            [
+                                "b",
+                                3000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_2"
+            },
+            "expect": {
+                "variant": "a",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a zero weight is skipped",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                0
+                            ],
+                            [
+                                "b",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "an empty rule serves the default",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {}
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a split behind a condition",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1",
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "a",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "targeting falls through to a split",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "a"
+                    },
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_3",
+                "properties": {
+                    "plan": "free"
+                }
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 1
+            }
+        },
+        {
+            "name": "a person flag splits by user id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "p",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_3",
+                "userId": "user_1"
+            },
+            "expect": {
+                "variant": "a",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a person flag has no unit without a user id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "p",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_1"
+            },
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a browser flag has no unit without an id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "userId": "user_1"
+            },
+            "expect": {
+                "variant": "control",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "the id is hashed as sent, untrimmed",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": " abc"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "the same id without the space",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "abc"
+            },
+            "expect": {
+                "variant": "a",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "\"00\" is an id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "00"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "an id containing a junk word is an id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "undefined-1"
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: undefined",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "undefined"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: null",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "null"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: none",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "none"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: nan",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "nan"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: 0",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "0"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: true",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "true"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: false",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "false"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: anonymous",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "anonymous"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: guest",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "guest"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "id"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: email",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "email"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: distinct_id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "distinct_id"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: distinctid",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "distinctid"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: not_authenticated",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "not_authenticated"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id: [object object]",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "[object object]"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "junk id in capitals",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "UNDEFINED"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a quoted junk id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "\"undefined\""
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a junk id padded with whitespace",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": " none\n"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "an empty id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": ""
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "a number is no id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": 42
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "256 units is an id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "257 units is no id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "an emoji counts two units: 254 + 2 is an id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "an emoji counts two units: 255 + 2 is no id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa😀"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "an umlaut counts one unit: 256 is an id",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "w": [
+                            [
+                                "on",
+                                10000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "üüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüü"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "in a segment the unit is in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [
+                        "seg_a"
+                    ],
+                    "unavailable": []
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "not in a segment the unit is in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a",
+                                1
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [
+                        "seg_a"
+                    ],
+                    "unavailable": []
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "in a segment the unit is not in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [],
+                    "unavailable": []
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not in a segment the unit is not in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a",
+                                1
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [],
+                    "unavailable": []
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "in an unavailable segment",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [],
+                    "unavailable": [
+                        "seg_a"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not in an unavailable segment",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a",
+                                1
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [],
+                    "unavailable": [
+                        "seg_a"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "unavailable wins over in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [
+                        "seg_a"
+                    ],
+                    "unavailable": [
+                        "seg_a"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "another segment stays available",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_b"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [
+                        "seg_b"
+                    ],
+                    "unavailable": [
+                        "seg_a"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "all segments unavailable: in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": "unavailable"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "all segments unavailable: not in",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a",
+                                1
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": "unavailable"
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "pending segments are not ready",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": "pending"
+            },
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "NOT_READY"
+            }
+        },
+        {
+            "name": "pending segments behind a matching rule are never reached",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    },
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "off"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                },
+                "segments": "pending"
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "pending segments are reached after a rule that does not match",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    },
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "off"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                },
+                "segments": "pending"
+            },
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "NOT_READY"
+            }
+        },
+        {
+            "name": "pending segments are not ready even when a property fails",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ],
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                },
+                "segments": "pending"
+            },
+            "expect": {
+                "reason": "ERROR",
+                "errorCode": "NOT_READY"
+            }
+        },
+        {
+            "name": "a segment rule falls through when its segment is unavailable",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a",
+                                1
+                            ]
+                        ],
+                        "x": "on"
+                    },
+                    {
+                        "x": "off"
+                    }
+                ]
+            },
+            "facts": {
+                "segments": {
+                    "in": [],
+                    "unavailable": [
+                        "seg_a"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "STATIC",
+                "rule": 1
+            }
+        },
+        {
+            "name": "a split behind a segment",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "m",
+                "u": "b",
+                "d": "control",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "s",
+                                "seg_a"
+                            ]
+                        ],
+                        "w": [
+                            [
+                                "a",
+                                5000
+                            ],
+                            [
+                                "b",
+                                5000
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "facts": {
+                "id": "user_3",
+                "segments": {
+                    "in": [
+                        "seg_a"
+                    ],
+                    "unavailable": []
+                }
+            },
+            "expect": {
+                "variant": "b",
+                "reason": "SPLIT",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a listed string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro",
+                                    "team"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: strings are case-sensitive",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "Pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    42
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": 42
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a numeric string matches a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    42
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "42"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a number matches a numeric string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "42"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": 42
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a numeric string with a fraction",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    1.5
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "1.50"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a leading zero is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    42
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "042"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: an exponent is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    42
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "4.2e1"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a leading space is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    5
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": " 5"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a trailing newline is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    5
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "5\n"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a boolean",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    true
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": true
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a boolean is not a string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "true"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": true
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: null is never listed",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    null
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a list property with a listed element",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": [
+                        "free",
+                        "pro"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: a nested list is no element",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": [
+                        [
+                            "pro"
+                        ]
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: list elements match across string and number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "1"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": [
+                        1,
+                        "x"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "is: an empty list property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": []
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: an object property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": {
+                        "name": "pro"
+                    }
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a missing property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a null property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": null
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "is: a value that is not a list",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                "pro"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not: an unlisted string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "not: a listed string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    "pro",
+                                    "team"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not: across string and number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    42
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "42"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not: a list property without a listed element",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": [
+                        "free"
+                    ]
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "not: an empty list property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": []
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "not: an empty object property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": {}
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not: a missing property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not: a value that is not a list",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                "pro"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "not: an empty list",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "not",
+                                []
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "free"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "has: a contained string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                [
+                                    "team",
+                                    "prise"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "enterprise"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "has: case-sensitive",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                [
+                                    "enter"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "Enterprise"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "has: non-strings in the list are ignored",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                [
+                                    1
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "a1"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "has: the empty string is in every string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                [
+                                    ""
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": ""
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "has: an empty list",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                []
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "has: a number property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                [
+                                    "1"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": 12
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "has: non-ASCII",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "has",
+                                [
+                                    "ü"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "Müller GmbH"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "nhas: none contained",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "nhas",
+                                [
+                                    "team",
+                                    "free"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "enterprise"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "nhas: one contained",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "nhas",
+                                [
+                                    "team",
+                                    "prise"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "enterprise"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "nhas: an empty list",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "nhas",
+                                []
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "nhas: the empty string is contained",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "nhas",
+                                [
+                                    ""
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "nhas: non-strings are ignored",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "nhas",
+                                [
+                                    1
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "1"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "pre: a listed prefix",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "path",
+                                "pre",
+                                [
+                                    "/docs",
+                                    "/pricing"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "path": "/pricing/team"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "pre: not a prefix",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "path",
+                                "pre",
+                                [
+                                    "/pricing"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "path": "/about/pricing"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "pre: the empty prefix",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "path",
+                                "pre",
+                                [
+                                    ""
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "path": "x"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "pre: an emoji prefix",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "path",
+                                "pre",
+                                [
+                                    "😀"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "path": "😀 hello"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "pre: a number property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "path",
+                                "pre",
+                                [
+                                    "1"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "path": 123
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "gt: greater",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                3
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": 5
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "gt: equal is not greater",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                3
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": 3
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "gt: a numeric string is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                3
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": "5"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "gt: a boolean is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                0
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": true
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "gt: a value that is not a number",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                "3"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": 5
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "gt: a list value",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                [
+                                    3
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": 5
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "gt: a missing property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                0
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "lt: less",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "lt",
+                                0
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": -1
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "lt: a null property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "seats",
+                                "lt",
+                                5
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "seats": null
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "set: a string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "set: an empty string",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": ""
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "set: an empty list",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": []
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "set: an object",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": {
+                        "name": "pro"
+                    }
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "set: an empty object",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": {}
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "set: null is not set",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": null
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "set: a missing property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "unset: a missing property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "unset",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "unset: a null property",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "unset",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": null
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "unset: an empty string is set",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "unset",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": ""
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "set: an inherited object key is missing",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "constructor",
+                                "set",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "unset: an inherited object key is missing",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "constructor",
+                                "unset",
+                                null
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {}
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "every condition must hold",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ],
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                3
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro",
+                    "seats": 5
+                }
+            },
+            "expect": {
+                "variant": "on",
+                "reason": "TARGETING_MATCH",
+                "rule": 0
+            }
+        },
+        {
+            "name": "one failing condition fails the rule",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "is",
+                                [
+                                    "pro"
+                                ]
+                            ],
+                            [
+                                "p",
+                                "seats",
+                                "gt",
+                                3
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro",
+                    "seats": 2
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "an unknown operator does not hold",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "p",
+                                "plan",
+                                "matches",
+                                [
+                                    "pro"
+                                ]
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        },
+        {
+            "name": "an unknown condition kind does not hold",
+            "flag": {
+                "s": "k3v9x0q2m7ta",
+                "t": "b",
+                "u": "b",
+                "d": "off",
+                "r": [
+                    {
+                        "if": [
+                            [
+                                "q",
+                                "plan"
+                            ]
+                        ],
+                        "x": "on"
+                    }
+                ]
+            },
+            "facts": {
+                "properties": {
+                    "plan": "pro"
+                }
+            },
+            "expect": {
+                "variant": "off",
+                "reason": "DEFAULT"
+            }
+        }
+    ]
+}

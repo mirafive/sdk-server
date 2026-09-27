@@ -1,0 +1,91 @@
+{
+  "name": "@mirafive/sdk-server",
+  "version": "0.5.0",
+  "description": "Send MIRA FIVE events and read feature flags from a server: Node, Bun, Deno, Cloudflare Workers and edge functions.",
+  "keywords": [
+    "ab-testing",
+    "analytics",
+    "cookieless",
+    "edge",
+    "feature-flags",
+    "gdpr",
+    "mirafive",
+    "privacy",
+    "server"
+  ],
+  "homepage": "https://mirafive.io",
+  "bugs": {
+    "email": "support@mirafive.io"
+  },
+  "license": "MIT",
+  "author": "MIRA FIVE <support@mirafive.io>",
+  "repository": "github:mirafive/sdk-server",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./flags": "./dist/flags.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:runtimes": "bun run build && node test/runtimes/run.mjs",
+    "golden": "MIRAFIVE_WRITE_GOLDEN=1 vitest run test/golden.test.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "size": "size-limit",
+    "vendor:protocol": "bun scripts/vendor-protocol.ts",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build && publint --strict && attw --pack --profile esm-only && size-limit"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@size-limit/preset-small-lib": "^14.0.1",
+    "@types/node": "^26.6.3",
+    "ajv": "^8.20.0",
+    "miniflare": "^4.20260730.0",
+    "oxfmt": "^0.70.0",
+    "oxlint": "^1.85.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "publint": "^0.3.24",
+    "size-limit": "^14.0.1",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  },
+  "size-limit": [
+    {
+      "name": "index",
+      "path": "dist/index.js",
+      "limit": "2.92 kB",
+      "gzip": true
+    },
+    {
+      "name": "flags",
+      "path": "dist/flags.js",
+      "limit": "3.8 kB",
+      "gzip": true
+    }
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "bun@1.4.2",
+  "mirafive": {
+    "protocol": [
+      "types",
+      "limits",
+      "batch-id",
+      "evaluate"
+    ]
+  }
+}
