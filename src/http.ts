@@ -5,8 +5,9 @@ export type Fetch = (input: string, init: RequestInit) => Promise<Response>
 export const SDK = "mirafive-server/0.5.0"
 
 export const trimHost = (host: string): string => {
-  if (!/^https?:\/\/[^/]/.test(host)) {
-    throw new TypeError(`host needs a scheme: ${host}`)
+  // Plain http only to this machine: the secret key travels in a header.
+  if (!/^(https:\/\/[^/]|http:\/\/(localhost|127\.0\.0\.1|\[::1\])([:/]|$))/.test(host)) {
+    throw new TypeError(`host must be https:// (http:// only for localhost): ${host}`)
   }
 
   return host.replace(/\/+$/, "")

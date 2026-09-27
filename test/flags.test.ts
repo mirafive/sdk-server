@@ -534,3 +534,66 @@ describe("per-call waitUntil", () => {
     })
   })
 })
+
+describe("review fixes", () => {
+  it("reports once that a consentless Mira counts no exposures", async () => {
+    const mira = new Mira({ key: "mf_ab12cd34_secret", mode: "consentless", fetch: fakeFetch().fetch })
+    const { flags: miraFlags, errors } = setup({}, { mira })
+
+    ;(await miraFlags.for({ userId: "user-42" })).variant("pricing")
+    ;(await miraFlags.for({ userId: "user-7" })).variant("pricing")
+    ;(await miraFlags.for({ userId: "user-8" })).variant("pricing")
+
+    expect(errors.map((error) => error.code)).toEqual(["collection_mode_not_allowed"])
+  })
+
+  it("retries a failed first fetch after 1, 2, 4 s, up to the refresh interval", async () => {
+    const { flags: miraFlags, documents } = setup({ document: () => new TypeError("offline") })
+
+    await miraFlags.ready()
+
+    for (const [index, gap] of [1000, 2000, 4000, 8000, 16_000, 30_000, 30_000].entries()) {
+      await vi.advanceTimersByTimeAsync(gap - 1)
+      await miraFlags.ready()
+      expect(documents()).toHaveLength(index + 1)
+      await vi.advanceTimersByTimeAsync(1)
+      await miraFlags.ready()
+      expect(documents()).toHaveLength(index + 2)
+    }
+  })
+
+  it("reads only own keys of the document", async () => {
+    const odd: Flag = { s: seed, t: "m", u: "p", d: "constructor", r: [] }
+    const { flags: miraFlags } = setup({ document: () => json(200, documentAt(now, { odd })) })
+    const user = await miraFlags.for({ userId: "user-42" })
+
+    expect(user.evaluate("constructor")).toEqual({ reason: "ERROR", errorCode: "FLAG_NOT_FOUND" })
+    expect(user.evaluate("toString")).toEqual({ reason: "ERROR", errorCode: "FLAG_NOT_FOUND" })
+    expect(user.variant("odd")).toBe("constructor")
+    expect(user.config("odd", "fallback")).toBe("fallback")
+  })
+
+  it("shares one lookup between concurrent reads of the same unit", async () => {
+    const { flags: miraFlags, lookups } = setup()
+
+    await miraFlags.ready()
+    await Promise.all([miraFlags.for({ userId: "u_1" }), miraFlags.for({ userId: "u_1" })])
+    // The second read of a tick joins the first's pending lookup.
+    await Promise.all([
+      miraFlags.for({ userId: "u_2" }),
+      Promise.resolve().then(() => miraFlags.for({ userId: "u_2" }))
+    ])
+
+    expect(lookups().map((call) => call.body)).toEqual([
+      { units: [{ userId: "u_1" }] },
+      { units: [{ userId: "u_2" }] }
+    ])
+  })
+
+  it("uses the default host for an empty one", async () => {
+    const { flags: miraFlags, calls } = setup({}, { host: "" })
+
+    await miraFlags.ready()
+    expect(calls[0]?.url).toBe("https://events.mirafive.io/v1/flags")
+  })
+})

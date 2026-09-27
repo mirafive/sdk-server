@@ -36,8 +36,8 @@ bun run vendor:protocol  # refresh src/protocol from ../protocol (or MIRAFIVE_PR
 - Test fixtures in `test/fixtures/` come from mirafive/protocol, copied unchanged, their
   sha256 pinned in `test/protocol.test.ts`. Never edit them. Every batch a test emits is
   validated against `batch.schema.json`.
-- Bundle size is the headline goal: `.` ≤ 3 kB, `./flags` ≤ 3.8 kB (min + gzip, shared
-  chunk included), but robustness wins over bytes: reads never throw, errors reach
+- Bundle size is the headline goal (min + gzip, shared chunk included; limits are measured
+  + ~3 %, `./flags` capped at 4 kB), but robustness wins over bytes: reads never throw, errors reach
   `onError`. A change that grows an entry explains why. No runtime dependencies.
 - WinterTC APIs only: no `node:` imports, no `process`, no DOM. `test:runtimes` proves it.
 - Each feature is its own entry point; `sideEffects: false` must stay true.

@@ -8,10 +8,10 @@ MIRA FIVE, hosted in the EU.
 
 | Import | min + gzip |
 |---|---|
-| `@mirafive/sdk-server` | 2.83 kB |
-| `@mirafive/sdk-server/flags` | 3.70 kB |
+| `@mirafive/sdk-server` | 3.52 kB |
+| `@mirafive/sdk-server/flags` | 3.88 kB |
 
-Both together are 5.6 kB: they share the transport. What you do not import is not
+Both together are about 6.2 kB: they share the transport. What you do not import is not
 shipped (`sideEffects: false`, one entry per feature). No runtime dependencies.
 
 ## Install
@@ -157,7 +157,9 @@ await mira.send(
 
 The batch id is derived from the key (`UUIDv8(SHA-256("mirafive:batch:" + key))`, PROTOCOL
 §5), so every MIRA FIVE SDK maps the same key to the same batch. The server deduplicates
-for a day. Retries always resend the byte-identical body.
+for a day. Retries always resend the byte-identical body. To resend byte-identically from
+another process (a durable outbox, sdk-convex), also fix each event's `time` and pass
+`sentAt`: `send(events, { idempotencyKey, sentAt })`.
 
 ### Flags and SSR bootstrap
 
@@ -225,7 +227,7 @@ because the block is per visitor.
 | Option | Default | |
 |---|---|---|
 | `key` | — | the source's secret key, `process.env.MIRAFIVE_SECRET_KEY` |
-| `host` | `https://events.mirafive.io` | must include the scheme |
+| `host` | `https://events.mirafive.io` | `https://`; plain `http://` only for localhost, 127.0.0.1 and [::1]. An empty string means the default |
 | `mode` | `"full"` | or `"consentless"` |
 | `flushAt` | `100` | 1–1000 events per buffered batch |
 | `flushAfterMs` | `1000` | how long an event waits in the buffer |
@@ -233,13 +235,13 @@ because the block is per visitor.
 | `maxRetries` | `3` | on 408, 429, 5xx, network errors and timeouts |
 | `fetch` | global `fetch` | a custom transport |
 | `waitUntil` | — | receives every in-flight delivery |
-| `onError` | `console.warn` | transport errors of buffered events |
+| `onError` | `console.warn` | failures of buffered events: transport errors, refused (`invalid_event`) events, and batches the server dropped for `ingestion_paused` or `allowance_exhausted` |
 
 | Member | |
 |---|---|
 | `track(name, { userId?, anonymousId?, sessionId?, properties?, time?, page?, id? })` | buffer an event; `time` is a `Date`, epoch ms or an ISO string, default now; `id` a UUID of your own |
 | `identify(userId, traits?, { anonymousId? })` | buffer `$identify` |
-| `send(events, { idempotencyKey?, signal? }): Promise<Receipt>` | 1–1000 events as one batch, now; rejects with `MiraError` |
+| `send(events, { idempotencyKey?, signal?, sentAt? }): Promise<Receipt>` | 1–1000 events as one batch, now; rejects with `MiraError`; honours `Retry-After` up to 120 s |
 | `flush(): Promise<void>` | send the buffer and wait for every delivery; never rejects |
 | `shutdown(): Promise<void>` | flush and stop; later events go to `onError` |
 | `with({ userId?, anonymousId?, properties? }): Mira` | a view whose events carry these; shares the buffer |
@@ -286,6 +288,15 @@ counted in the browser, or no consent: the default is served).
 
 ## Framework / runtime notes
 
+- Every event is checked and serialised when you call `track()`, against the server's
+  limits (name ≤ 128 characters, ids ≤ 256, page URL/referrer ≤ 2048 and title ≤ 512,
+  properties ≤ 64 values, ≤ 5 levels, keys ≤ 128 characters, ≤ 32 KB as the server
+  encodes them). An event that fails, or whose properties are not JSON (a `BigInt`, a
+  cycle), is dropped alone and reported as `invalid_event`; the rest of the batch goes.
+- If the server still refuses a buffered batch (`400 validation_failed`), the events it
+  names are dropped and the rest is sent once more under a batch id derived from the first.
+- Buffered deliveries honour `Retry-After` up to 30 s, `send()` up to 120 s.
+
 - Segment lookups (`POST /v1/flags/segments`) batch every `for()` of one tick, up to 100
   units per request, wait at most 300 ms and are cached for a minute.
 - A failed refresh keeps the last document and backs off up to 5 minutes; a 401 or 403
@@ -305,7 +316,9 @@ counted in the browser, or no consent: the default is served).
 | `403 website_key_as_bearer` | You passed the website key; server sources need the secret key. |
 | `400 collection_mode_not_allowed` | The source is consentless and you send `mode: "full"`. |
 | `TypeError: consentless mode …` | Identifiers in consentless mode; remove them or switch the mode. |
-| `invalid_event` in `onError` | A name starting with `$` that is not reserved, a blank id, a bad time or a non-UUID `id`/`sessionId`; the event was dropped before sending. |
+| `invalid_event` in `onError` | The event breaks a server limit (see runtime notes) or its properties are not JSON; it was dropped before sending, the others were sent. |
+| `ingestion_paused` / `allowance_exhausted` in `onError` | The server accepted the batch but kept nothing: the organization is paused or out of allowance. |
+| `collection_mode_not_allowed` from flags | `MiraFlags` got a consentless `Mira`, which cannot send exposures; pass a full-mode client. |
 | A flag always returns its fallback | `evaluate(key)` tells why: `NOT_READY` (no document within 1.5 s), `FLAG_NOT_FOUND` (not in this source's flags), `NOT_ALLOWED` (consent, or an experiment counted in the browser). |
 
 ## For AI agents
@@ -323,6 +336,8 @@ Add MIRA FIVE server-side analytics (and flags, if the project uses feature flag
    `mira.track("signup", { userId: user.id, properties: { plan } })`, and
    `mira.identify(user.id, { plan })` after signup/login. Use the internal user id, never an email.
    For webhooks, use `await mira.send([...], { idempotencyKey: event.id })`.
+   Feature flags: `export const flags = new MiraFlags({ key: process.env.MIRAFIVE_SECRET_KEY, mira })`
+   (import from "@mirafive/sdk-server/flags"), then `(await flags.for({ userId: user.id })).enabled("key")`.
 5. Make sure events leave before the function ends: pass `waitUntil` (Vercel: from @vercel/functions),
    or `after(() => mira.flush())` in Next.js, or `await mira.flush()`; call `await mira.shutdown()` on SIGTERM.
 6. Server events are "full" mode by default: the app holds consent. For anonymous counts only, use
@@ -350,7 +365,8 @@ Facts for agents:
   Revenue goes in `properties: { revenue: 49.9, currency: "EUR" }`.
 - Verify an install with `await mira.send([{ name: "$install_check" }])`: the receipt has
   `reason: "install_check"`; it is never stored or billed.
-- Flags: `const user = await flags.for({ userId }, { waitUntil })` (`optedOut: true` when the
+- Flags: `const flags = new MiraFlags({ key: process.env.MIRAFIVE_SECRET_KEY, mira })` once,
+  then `const user = await flags.for({ userId }, { waitUntil })` (`optedOut: true` when the
   request has `Sec-GPC: 1` or `DNT: 1`), then `user.enabled(key)`,
   `user.variant(key, fallback)`, `user.config(key, fallback)`; in SSR put
   `user.bootstrap()` in `<head>` and send `bootstrapHeaders`.

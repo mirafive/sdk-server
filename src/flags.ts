@@ -109,6 +109,9 @@ const cache = <T>(ttl: number) => {
   }
 }
 
+const own = <T>(record: Readonly<Record<string, T>> | undefined, key: string): T | undefined =>
+  record && Object.hasOwn(record, key) ? record[key] : undefined
+
 const refsOf = (flag: Flag): string[] => {
   try {
     return flag.r.flatMap(
@@ -131,12 +134,14 @@ export class MiraFlags {
   constructor(options: MiraFlagsOptions) {
     const { mira, waitUntil, onError, fetch } = options
     const key = options.key?.trim()
-    const host = trimHost(options.host ?? DEFAULT_HOST)
+    const host = trimHost(options.host || DEFAULT_HOST)
     const refreshMs = Math.max(10, options.refreshSeconds ?? 30) * 1000
     const known = cache<Segments | "unavailable">(MINUTE)
     const exposed = cache<1>(60 * MINUTE)
+    const asking = new Map<string, Promise<Segments | "unavailable">>()
     let lookups: Lookup[] = []
     let lookupsFrom = 0
+    let consentless = false
     let document: FlagDocument | undefined
     let etag: string | undefined
     let fetchedAt: number | undefined
@@ -221,7 +226,10 @@ export class MiraFlags {
         })
         .catch((error: MiraError) => {
           report(error)
-          wait = Math.min(5 * MINUTE, wait * 2 ** ++failures)
+          // Without any document, retry soon: 1 s, 2 s, 4 s … up to the refresh interval.
+          wait = snapshot()
+            ? Math.min(5 * MINUTE, wait * 2 ** ++failures)
+            : Math.min(wait, 500 * 2 ** ++failures)
           floor = error.retryAfterMs ?? 0
           stopped = error.code === "unauthorized" || error.status === 403
         })
@@ -280,23 +288,34 @@ export class MiraFlags {
       )
 
     // Lookups of one tick share requests of up to 100 units.
-    const lookup = (unit: string): Promise<Segments | "unavailable"> | Segments | "unavailable" =>
-      known.get(unit) ??
-      (Date.now() < lookupsFrom
-        ? "unavailable"
-        : new Promise((resolve) => {
-            if (lookups.push([unit, resolve]) === 1) {
-              queueMicrotask(() => {
-                const queued = lookups
+    const lookup = (unit: string): Promise<Segments | "unavailable"> | Segments | "unavailable" => {
+      const found =
+        known.get(unit) ?? asking.get(unit) ?? (Date.now() < lookupsFrom ? "unavailable" : undefined)
 
-                lookups = []
+      if (found) {
+        return found
+      }
 
-                for (let at = 0; at < queued.length; at += MAX_LOOKUP_UNITS) {
-                  void ask(queued.slice(at, at + MAX_LOOKUP_UNITS))
-                }
-              })
+      // Concurrent reads of one unit share its lookup.
+      const asked = new Promise<Segments | "unavailable">((resolve) => {
+        if (lookups.push([unit, resolve]) === 1) {
+          queueMicrotask(() => {
+            const queued = lookups
+
+            lookups = []
+
+            for (let at = 0; at < queued.length; at += MAX_LOOKUP_UNITS) {
+              void ask(queued.slice(at, at + MAX_LOOKUP_UNITS))
             }
-          }))
+          })
+        }
+      })
+
+      asking.set(unit, asked)
+      void asked.then(() => asking.delete(unit))
+
+      return asked
+    }
 
     const forUnit = async (
       unit: FlagUnit = {},
@@ -321,7 +340,7 @@ export class MiraFlags {
 
       // use: 0 explains, 1 reads a value, 2 reads for a bootstrap.
       const read = (flagKey: string, use: 0 | 1 | 2): FlagEvaluation => {
-        const flag = current?.flags[flagKey]
+        const flag = own(current?.flags, flagKey)
 
         if (!flag) {
           return { reason: "ERROR", errorCode: current ? "FLAG_NOT_FOUND" : "NOT_READY" }
@@ -360,11 +379,20 @@ export class MiraFlags {
               anonymousId,
               properties: { $experiment: flagKey, $variant: variant }
             })
-            // With a waitUntil the exposure leaves with this request, not on the client's timer.
-            wait?.(mira.flush())
           } catch {
-            // A consentless client counts no exposures.
+            if (!consentless) {
+              consentless = true
+              report(
+                new MiraError(
+                  "collection_mode_not_allowed",
+                  "a consentless Mira counts no exposures; pass a full one"
+                )
+              )
+            }
           }
+
+          // With a waitUntil the exposure leaves with this request, not on the client's timer.
+          wait?.(mira.flush())
         }
 
         return errorCode ? { ...decision, errorCode } : decision
@@ -393,7 +421,7 @@ export class MiraFlags {
           const on = pick(flagKey)
 
           // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the caller names the config's type
-          return ((on && current?.flags[flagKey]?.p?.[on]) ?? fallback) as T
+          return ((on && own(own(current?.flags, flagKey)?.p, on)) ?? fallback) as T
         },
         evaluate: (flagKey) => read(flagKey, 0),
         bootstrap: () => {
@@ -416,7 +444,7 @@ export class MiraFlags {
             const answer = read(flagKey, 2)
 
             if (answer.reason !== "ERROR") {
-              const value = flag.p?.[answer.variant]
+              const value = own(flag.p, answer.variant)
 
               // An experiment the browser counts but the server split: the page sends its exposure.
               values[flagKey] =

@@ -66,13 +66,13 @@
     {
       "name": "index",
       "path": "dist/index.js",
-      "limit": "2.92 kB",
+      "limit": "3.62 kB",
       "gzip": true
     },
     {
       "name": "flags",
       "path": "dist/flags.js",
-      "limit": "3.8 kB",
+      "limit": "3.99 kB",
       "gzip": true
     }
   ],

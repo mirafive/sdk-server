@@ -1,10 +1,15 @@
+import { readFileSync } from "node:fs"
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { MiraFlags } from "../src/flags.ts"
+import { SDK } from "../src/http.ts"
 import { Mira, MiraError } from "../src/index.ts"
+import { batchIdFor } from "../src/protocol/batch-id.ts"
 import { accept, fakeFetch, hang, json } from "./helpers.ts"
 
 const key = "mf_ab12cd34_secret"
+const now = 1_790_153_842_822
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"], now: 1_790_153_842_822 })
@@ -218,10 +223,10 @@ describe("retries", () => {
   it.each([
     ["2", 2000],
     ["0", 250],
-    ["120", 30_000],
+    ["600", 120_000],
     // HTTP dates have whole seconds.
     [new Date(1_790_153_842_822 + 5000).toUTCString(), 4178]
-  ])("honours Retry-After %s, clamped to 250 ms–30 s", async (header, wait) => {
+  ])("honours Retry-After %s, clamped to 250 ms–120 s for send()", async (header, wait) => {
     const { mira, calls } = client((call, index) =>
       index === 0
         ? json(429, { code: "rate_limited", detail: "slow down" }, { "Retry-After": header })
@@ -330,10 +335,8 @@ describe("send()", () => {
     )
     await expect(mira.send([{ name: "x" }], { idempotencyKey: "" })).rejects.toBeInstanceOf(TypeError)
     await expect(
-      mira.send([{ name: "x", properties: { blob: "x".repeat(1_100_000) } }])
-    ).rejects.toMatchObject({
-      code: "payload_too_large"
-    })
+      mira.send(Array.from({ length: 40 }, () => ({ name: "x", properties: { blob: "x".repeat(30_000) } })))
+    ).rejects.toMatchObject({ code: "payload_too_large" })
     expect(calls).toHaveLength(0)
   })
 
@@ -481,5 +484,184 @@ describe("configuration", () => {
     mira.track("signup", { properties: { plan: "enterprise" } })
     expect(new MiraFlags({ key, mira })).toBeInstanceOf(MiraFlags)
     void mira.shutdown()
+  })
+})
+
+describe("review fixes", () => {
+  it("drops an event whose properties cannot be serialised, keeps the rest, never rejects", async () => {
+    const { mira, batches, errors } = client()
+    const circular: Record<string, unknown[]> = { list: [] }
+
+    circular["list"]?.push(circular)
+    mira.track("a")
+    mira.track("big", { properties: { amount: 1n } as unknown as Record<string, unknown> })
+    mira.track("loop", { properties: circular })
+    mira.track("b")
+    await expect(mira.flush()).resolves.toBeUndefined()
+
+    expect(batches()[0]?.events.map((event) => event["name"])).toEqual(["a", "b"])
+    expect(errors.map((error) => error.code)).toEqual(["invalid_event", "invalid_event"])
+    await expect(mira.send([{ name: "x", properties: { amount: 1n } }])).rejects.toMatchObject({
+      code: "invalid_event"
+    })
+  })
+
+  it("never rejects flush() or waitUntil promises, even when onError throws", async () => {
+    const handed: Promise<unknown>[] = []
+    const { mira } = client(() => json(500, {}), {
+      maxRetries: 0,
+      waitUntil: (promise) => handed.push(promise),
+      onError: () => {
+        throw new Error("logger down")
+      }
+    })
+
+    mira.track("x")
+    await expect(mira.flush()).resolves.toBeUndefined()
+    await expect(Promise.all(handed)).resolves.toBeDefined()
+  })
+
+  it.each([
+    ["65 values", Object.fromEntries(Array.from({ length: 65 }, (_, index) => [`k${index}`, index]))],
+    ["6 levels", { a: { b: { c: { d: { e: { f: 1 } } } } } }],
+    ["a 129-character key", { ["k".repeat(129)]: 1 }],
+    ["slashes over 32 KB as the server encodes them", { path: "/".repeat(16_400) }],
+    ["non-ASCII over 32 KB as the server encodes them", { text: "ä".repeat(5500) }]
+  ])("drops properties with %s", async (_, properties) => {
+    const { mira, calls, errors } = client()
+
+    mira.track("x", { properties })
+    await mira.flush()
+    expect(calls).toHaveLength(0)
+    expect(errors[0]).toMatchObject({ code: "invalid_event" })
+  })
+
+  it.each([
+    ["5 levels", { a: { b: { c: { d: { e: 1 } } } } }],
+    ["30,000 ASCII characters", { text: "a".repeat(30_000) }],
+    [
+      "a list keyed 0…69 as one value",
+      { list: Object.fromEntries(Array.from({ length: 70 }, (_, index) => [index, 1])) }
+    ]
+  ])("keeps properties with %s", async (_, properties) => {
+    const { mira, calls, errors } = client()
+
+    mira.track("x", { properties })
+    await mira.flush()
+    expect(errors).toHaveLength(0)
+    expect(calls).toHaveLength(1)
+  })
+
+  it("drops an event with an overlong page field", async () => {
+    const { mira, errors } = client()
+
+    mira.track("x", { page: { url: `https://shop.example/${"a".repeat(2048)}` } })
+    await mira.flush()
+    expect(errors[0]).toMatchObject({ code: "invalid_event" })
+  })
+
+  it("resends a refused buffered batch without the events the server named", async () => {
+    const { mira, calls, errors } = client((call, index) =>
+      index === 0
+        ? json(400, {
+            code: "validation_failed",
+            detail: "The batch does not match the schema.",
+            errors: [{ path: "events.1.properties", message: "too big" }]
+          })
+        : accept(call)
+    )
+
+    mira.track("a")
+    mira.track("b")
+    mira.track("c")
+    await mira.flush()
+
+    const [first, second] = calls.map((call) => call.body as { batch: string; events: { name: string }[] })
+
+    expect(second?.events.map((event) => event.name)).toEqual(["a", "c"])
+    expect(second?.batch).toBe(await batchIdFor(first?.batch ?? ""))
+    expect(errors.map((error) => error.code)).toEqual(["validation_failed"])
+  })
+
+  it("does not resend when the refusal names no event", async () => {
+    const { mira, calls } = client(() =>
+      json(400, { code: "validation_failed", detail: "", errors: [{ path: "context.sdk", message: "bad" }] })
+    )
+
+    mira.track("a")
+    await mira.flush()
+    expect(calls).toHaveLength(1)
+  })
+
+  it.each([
+    ["allowance_exhausted", true],
+    ["ingestion_paused", true],
+    ["bot", false],
+    ["install_check", false]
+  ])("reports a buffered batch dropped as %s: %s", async (reason, reported) => {
+    const { mira, errors } = client((call) =>
+      json(202, { batch: (call.body as { batch: string }).batch, accepted: 0, dropped: 1, reason })
+    )
+
+    mira.track("a")
+    await mira.flush()
+    expect(errors.map((error) => [error.code, error.retryable])).toEqual(reported ? [[reason, false]] : [])
+  })
+
+  it("takes sentAt so a resend from another process is byte-identical", async () => {
+    const { mira, calls } = client()
+    const events = [{ name: "order completed", time: 1_790_000_000_000, properties: { revenue: 5 } }]
+
+    await mira.send(events, { idempotencyKey: "order-1", sentAt: 1_790_000_000_500 })
+    vi.setSystemTime(now + 60_000)
+    await mira.send(events, { idempotencyKey: "order-1", sentAt: 1_790_000_000_500 })
+
+    expect(calls[0]?.raw).toBe(calls[1]?.raw)
+    expect(calls[0]?.body).toMatchObject({ sentAt: 1_790_000_000_500 })
+  })
+
+  it("caps Retry-After at 30 s for buffered batches", async () => {
+    const { mira, calls } = client((call, index) =>
+      index === 0 ? json(429, { code: "rate_limited", detail: "" }, { "Retry-After": "600" }) : accept(call)
+    )
+
+    mira.track("a")
+    void mira.flush()
+    await vi.advanceTimersByTimeAsync(29_999)
+    expect(calls).toHaveLength(1)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(calls).toHaveLength(2)
+  })
+
+  it("removes its abort listener once a backoff ends", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0)
+    const controller = new AbortController()
+    const removed = vi.spyOn(controller.signal, "removeEventListener")
+    const { mira } = client((call, index) => (index === 0 ? json(503, {}) : accept(call)))
+    const sent = mira.send([{ name: "x" }], { signal: controller.signal })
+
+    await vi.advanceTimersByTimeAsync(1)
+    await sent
+    // Two requests and one backoff each remove theirs.
+    expect(removed).toHaveBeenCalledTimes(3)
+  })
+
+  it("falls back to the default host for an empty one and refuses plain http beyond this machine", async () => {
+    const { mira, calls } = client(undefined, { host: "" })
+
+    await mira.send([{ name: "x" }])
+    expect(calls[0]?.url).toBe("https://events.mirafive.io/v1/batch")
+    expect(() => new Mira({ key, host: "http://events.example.com" })).toThrow(TypeError)
+    expect(() => new Mira({ key, host: "http://localhost.example.com" })).toThrow(TypeError)
+    expect(() => new Mira({ key, host: "http://localhost:8080" })).not.toThrow()
+    expect(() => new Mira({ key, host: "http://[::1]:3000/" })).not.toThrow()
+  })
+
+  it("names itself with the package version", () => {
+    const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+      version: string
+    }
+
+    expect(SDK).toBe(`mirafive-server/${version}`)
   })
 })
