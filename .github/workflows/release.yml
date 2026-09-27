@@ -1,0 +1,65 @@
+name: Release
+
+# Push a tag vX.Y.Z whose version matches package.json and has a CHANGELOG section.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+
+      # Trusted publishing needs npm >= 11.5.1 and Node >= 22.14.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@latest
+
+      - name: Tag matches package.json
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "::error::tag $GITHUB_REF_NAME, package.json $version"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v v="$VERSION" '$0 ~ "^## "v"( |$)" {f=1; next} /^## / {if (f) exit} f' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "::error::CHANGELOG.md has no section for $VERSION"; exit 1; }
+
+      - run: bun install --frozen-lockfile
+
+      # prepublishOnly runs `bun run check`. A private package (protocol) is only checked; a version already
+      # on npm is skipped, so a rerun only redoes the release.
+      - name: Publish to npm
+        run: |
+          name=$(node -p 'require("./package.json").name')
+          if [ "$(node -p 'require("./package.json").private === true')" = true ]; then
+            bun run check
+          elif npm view "$name@$VERSION" version >/dev/null 2>&1; then
+            echo "$name@$VERSION is already on npm"
+            bun run build
+          else
+            npm publish --access public
+          fi
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 && exit 0
+          assets=()
+          if [ -f dist/manifest.json ]; then assets=(dist/mira.js dist/mira.*.js dist/manifest.json dist/chunks/*.js); fi
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$VERSION" --notes-file notes.md "${assets[@]}"
