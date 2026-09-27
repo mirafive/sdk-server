@@ -19,7 +19,10 @@
   },
   "license": "MIT",
   "author": "MIRA FIVE <support@mirafive.io>",
-  "repository": "github:mirafive/sdk-server",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mirafive/sdk-server.git"
+  },
   "files": [
     "dist"
   ],
@@ -31,8 +34,7 @@
     "./package.json": "./package.json"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "scripts": {
     "build": "tsdown",
