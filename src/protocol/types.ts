@@ -1,4 +1,4 @@
-// Vendored from mirafive/protocol b1346ccb992a. Do not edit; run bun run vendor:protocol.
+// Vendored from mirafive/protocol 7db91649f92e. Do not edit; run bun run vendor:protocol.
 export type Json = string | number | boolean | null | readonly Json[] | { readonly [key: string]: Json }
 
 export type Mode = "consentless" | "full"

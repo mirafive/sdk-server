@@ -41,7 +41,7 @@ describe("buffering", () => {
     await mira.flush()
 
     expect(calls).toHaveLength(1)
-    expect(calls[0]?.url).toBe("https://events.mirafive.io/v1/batch")
+    expect(calls[0]?.url).toBe("https://collect.mirafive.io/v1/batch")
     expect(calls[0]?.method).toBe("POST")
     expect(calls[0]?.headers).toMatchObject({
       Authorization: `Bearer ${key}`,
@@ -307,6 +307,15 @@ describe("send()", () => {
 
     expect(batches()[0]?.batch).toBe("274e05f0-4dd7-8db9-a563-87ea5c891487")
     expect(receipt).toEqual({ batch: "274e05f0-4dd7-8db9-a563-87ea5c891487", accepted: 1, dropped: 0 })
+  })
+
+  it("sends payment_id next to revenue and currency", async () => {
+    const { mira, batches } = client()
+    const properties = { revenue: 49.9, currency: "EUR", payment_id: "pi_3Q1b2c3d4e5f6g7h" }
+
+    await mira.send([{ name: "order completed", userId: "u_42", properties }])
+
+    expect(batches()[0]?.events[0]?.properties).toEqual(properties)
   })
 
   it("returns a dropped receipt as it is", async () => {
@@ -648,7 +657,7 @@ describe("review fixes", () => {
     const { mira, calls } = client(undefined, { host: "" })
 
     await mira.send([{ name: "x" }])
-    expect(calls[0]?.url).toBe("https://events.mirafive.io/v1/batch")
+    expect(calls[0]?.url).toBe("https://collect.mirafive.io/v1/batch")
     expect(() => new Mira({ key, host: "http://events.example.com" })).toThrow(TypeError)
     expect(() => new Mira({ key, host: "http://localhost.example.com" })).toThrow(TypeError)
     expect(() => new Mira({ key, host: "http://localhost:8080" })).not.toThrow()

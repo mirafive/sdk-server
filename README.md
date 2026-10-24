@@ -166,7 +166,7 @@ another process (a durable outbox, sdk-convex), also fix each event's `time` and
 | Option | Default | |
 |---|---|---|
 | `key` | — | the source's secret key, `process.env.MIRAFIVE_SECRET_KEY` |
-| `host` | `https://events.mirafive.io` | `https://`; plain `http://` only for localhost, 127.0.0.1 and [::1]. An empty string means the default |
+| `host` | `https://collect.mirafive.io` | `https://`; plain `http://` only for localhost, 127.0.0.1 and [::1]. An empty string means the default |
 | `mode` | `"full"` | or `"consentless"` |
 | `flushAt` | `100` | 1–1000 events per buffered batch |
 | `flushAfterMs` | `1000` | how long an event waits in the buffer |
@@ -253,7 +253,7 @@ Facts for agents:
 
 - Imports: `import { Mira, MiraError } from "@mirafive/sdk-server"`.
 - Env vars: `MIRAFIVE_SECRET_KEY` (server only, required), `MIRAFIVE_HOST` (optional,
-  default `https://events.mirafive.io`). The package does not read env vars itself: pass
+  default `https://collect.mirafive.io`). The package does not read env vars itself: pass
   `key: process.env.MIRAFIVE_SECRET_KEY` (`env.MIRAFIVE_SECRET_KEY` on Workers).
 - Never ship `MIRAFIVE_SECRET_KEY` or this package to a browser bundle; a secret key
   seen from a browser is refused and marked exposed. Browsers use `@mirafive/sdk-browser`
@@ -263,7 +263,12 @@ Facts for agents:
 - `track()`/`identify()` never throw for transport reasons; failures go to `onError`.
   `send()` rejects with `MiraError`. Identifiers in consentless mode throw `TypeError`.
 - Event names starting with `$` are reserved; use plain names like `order completed`.
-  Revenue goes in `properties: { revenue: 49.9, currency: "EUR" }`.
+  Revenue goes in `properties: { revenue: 49.9, currency: "EUR" }`. Add `payment_id`
+  (1–255 characters) with the payment provider's id of the payment. For Stripe pass the
+  PaymentIntent id (`pi_…`) from your webhook, for example
+  `properties: { revenue: 49.9, currency: "EUR", payment_id: paymentIntent.id }`.
+  MIRA FIVE merges the event with the payment it imports from your connected Stripe
+  account, so the sale counts once.
 - Verify an install with `await mira.send([{ name: "$install_check" }])`: the receipt has
   `reason: "install_check"`; it is never stored or billed.
 - Wire contract: [mirafive/protocol](https://github.com/mirafive/protocol).

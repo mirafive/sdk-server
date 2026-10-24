@@ -159,6 +159,14 @@
           "maxProperties": 64,
           "propertyNames": {
             "maxLength": 128
+          },
+          "properties": {
+            "payment_id": {
+              "description": "The payment provider's id of the payment (for Stripe pi_, ch_, in_ or cs_). The server merges the event with the imported payment; the amount, currency and refunds always come from the provider, and a browser claim ranks below a server batch and Stripe metadata mirafive_id (PROTOCOL.md §3).",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
           }
         },
         "anonymousId": {

@@ -112,7 +112,7 @@ function answer(response, status, payload, headers = {}) {
   response.end(payload === undefined ? undefined : JSON.stringify(payload))
 }
 
-/** Stands in for events.mirafive.io and records every request, so the smoke can check what went out. */
+/** Stands in for collect.mirafive.io and records every request, so the smoke can check what went out. */
 function stub() {
   const answered = new Set()
   const listener = createServer((request, response) => {
