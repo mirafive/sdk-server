@@ -1,4 +1,4 @@
-// Vendored from mirafive/protocol 5037788489cb. Do not edit; run bun run vendor:protocol.
+// Vendored from mirafive/protocol b1346ccb992a. Do not edit; run bun run vendor:protocol.
 export const PROTOCOL_VERSION = 1
 export const DEFAULT_HOST = "https://events.mirafive.io"
 
@@ -23,9 +23,6 @@ export const MAX_PROPERTY_LEAVES = 64
 export const MAX_PROPERTY_DEPTH = 5
 export const MAX_PROPERTY_KEY_LENGTH = 128
 
-export const MAX_LOOKUP_UNITS = 100
-export const MAX_LOOKUP_BODY_BYTES = 1024
-
 export const RESERVED_NAMES = [
   "$pageview",
   "$autocapture",
@@ -35,7 +32,7 @@ export const RESERVED_NAMES = [
   "$exposure"
 ] as const
 
-export const FULL_ONLY_NAMES = ["$identify", "$search", "$exposure"] as const
+export const FULL_ONLY_NAMES = ["$identify", "$search"] as const
 
 export const KEPT_QUERY_PARAMETERS = [
   "ref",

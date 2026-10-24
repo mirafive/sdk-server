@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs"
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { MiraFlags } from "../src/flags.ts"
 import { SDK } from "../src/http.ts"
 import { Mira, MiraError } from "../src/index.ts"
 import { batchIdFor } from "../src/protocol/batch-id.ts"
@@ -482,7 +481,6 @@ describe("configuration", () => {
     mira.track("nope")
     // @ts-expect-error wrong property type
     mira.track("signup", { properties: { plan: "enterprise" } })
-    expect(new MiraFlags({ key, mira })).toBeInstanceOf(MiraFlags)
     void mira.shutdown()
   })
 })

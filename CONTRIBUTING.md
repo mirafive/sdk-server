@@ -7,7 +7,7 @@ Thanks for helping with the MIRA FIVE server SDK.
 Small fixes (a bug, a typo, a missing test) can go straight to a pull request. For
 anything that changes behavior or the public API, open an issue first so we can agree on
 the approach before you write it. The public API of every SDK is defined in
-[mirafive/protocol](https://github.com/mirafive/protocol) (API.md, PROTOCOL.md, FLAGS.md),
+[mirafive/protocol](https://github.com/mirafive/protocol) (API.md, PROTOCOL.md),
 so an API change starts there.
 
 ## Setup
@@ -38,10 +38,10 @@ bun run check
 ```
 
 - Types: `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`, `style`, `revert`.
-- The scope is optional and names the area, e.g. `flags`, `pageviews`, `cdn`.
+- The scope is optional and names the area, e.g. `consent`, `retry`, `cdn`.
 - The description is lowercase, has no trailing period and says what changed:
   `fix: count property bytes as UTF-8, as the server now does`.
-- A breaking change gets a `!`: `feat(flags)!: drop the v0 bootstrap format`.
+- A breaking change gets a `!`: `feat(send)!: drop the v0 batch format`.
 - One logical change per commit.
 
 ## Pull requests

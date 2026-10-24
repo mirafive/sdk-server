@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "description": "MIRA FIVE server SDK for JS runtimes",
   "keywords": [
-    "ab-testing",
     "analytics",
     "cookieless",
     "edge",
-    "feature-flags",
     "gdpr",
     "mirafive",
     "privacy",
@@ -30,7 +28,6 @@
   "sideEffects": false,
   "exports": {
     ".": "./dist/index.js",
-    "./flags": "./dist/flags.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -71,12 +68,6 @@
       "path": "dist/index.js",
       "limit": "3.62 kB",
       "gzip": true
-    },
-    {
-      "name": "flags",
-      "path": "dist/flags.js",
-      "limit": "3.99 kB",
-      "gzip": true
     }
   ],
   "engines": {
@@ -87,8 +78,7 @@
     "protocol": [
       "types",
       "limits",
-      "batch-id",
-      "evaluate"
+      "batch-id"
     ]
   }
 }

@@ -3,8 +3,6 @@ import { spawn, spawnSync } from "node:child_process"
 import { createServer } from "node:http"
 import { fileURLToPath } from "node:url"
 
-import { flagDocument } from "./smoke.mjs"
-
 const file = (name) => fileURLToPath(new URL(name, import.meta.url))
 const root = fileURLToPath(new URL("../../", import.meta.url))
 const results = []
@@ -89,27 +87,18 @@ async function workerd() {
 
     results.push(response.ok ? `PASS ${text}` : `FAIL workerd:\n${text}`)
 
-    const answers = []
-
     for (const user of ["user-42", "user-43"]) {
-      const reused = await miniflare.dispatchFetch(
-        `http://worker.test/reuse?host=${encodeURIComponent(host)}&user=${user}`
-      )
-
-      answers.push(await reused.text())
+      await miniflare.dispatchFetch(`http://worker.test/reuse?host=${encodeURIComponent(host)}&user=${user}`)
     }
 
-    const requests = seen.filter((request) => request.key === "mf_smoke000_reuse")
-    const documents = requests.filter((request) => request.path === "/v1/flags")
-    const exposures = requests
-      .filter((request) => request.path === "/v1/batch")
+    const events = seen
+      .filter((request) => request.key === "mf_smoke000_reuse" && request.path === "/v1/batch")
       .flatMap((request) => JSON.parse(request.body).events)
-      .filter((event) => event.name === "$exposure")
 
     results.push(
-      answers.join() === "b true,a true" && documents.length === 1 && exposures.length === 2
-        ? "PASS workerd: one module-level MiraFlags served two requests (1 document fetch, 2 exposures via per-call waitUntil)"
-        : `FAIL workerd reuse: ${answers.join()} / ${documents.length} documents / ${exposures.length} exposures`
+      events.length === 2
+        ? "PASS workerd: one module-level Mira served two requests (2 events via per-call waitUntil)"
+        : `FAIL workerd reuse: ${events.length} events`
     )
   } catch (error) {
     results.push(`FAIL workerd: ${error?.stack ?? error}`)
@@ -158,24 +147,6 @@ function stub() {
             ...(check && { reason: "install_check" })
           })
         }
-      } else if (path === "/v1/flags") {
-        if (request.headers["if-none-match"] === 'W/"f-smoke"') {
-          answer(response, 304)
-        } else {
-          answer(response, 200, flagDocument(Date.now()), {
-            ETag: 'W/"f-smoke"',
-            "Cache-Control": "private, no-cache"
-          })
-        }
-      } else if (path === "/v1/flags/segments") {
-        answer(response, 200, {
-          units: JSON.parse(body).units.map(() => ({
-            segments: ["3fa9c1e07b"],
-            unavailable: [],
-            refreshedAt: Date.now(),
-            stale: false
-          }))
-        })
       } else {
         answer(response, 404, { code: "not_found", detail: path })
       }

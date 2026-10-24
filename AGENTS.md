@@ -1,9 +1,8 @@
 # Agents working in mirafive/sdk-server
 
-`@mirafive/sdk-server`: events and feature flags from servers and edge runtimes (Node, Bun,
-Deno, workerd). Part of the MIRA FIVE SDK family; the wire contract, flag semantics and
-public API live in [mirafive/protocol](https://github.com/mirafive/protocol) (PROTOCOL.md,
-FLAGS.md, API.md).
+`@mirafive/sdk-server`: events from servers and edge runtimes (Node, Bun,
+Deno, workerd). Part of the MIRA FIVE SDK family; the wire contract and public API live in
+[mirafive/protocol](https://github.com/mirafive/protocol) (PROTOCOL.md, API.md).
 
 ## Commands
 
@@ -20,9 +19,7 @@ bun run vendor:protocol  # refresh src/protocol from ../protocol (or MIRAFIVE_PR
 ## Layout
 
 - `src/mira.ts`: `Mira` (buffer, split, retries, idempotency) and the shared `Core`.
-- `src/flags.ts`: `MiraFlags` (document refresh, segments, exposures, bootstrap).
-- `src/http.ts`, `src/error.ts`: the request helper and `MiraError`, shared by both
-  entries (built into `dist/shared.js`).
+- `src/http.ts`, `src/error.ts`: the request helper and `MiraError`.
 - `test/golden/server.json`: the batch the Laravel app's SDK contract test ingests
   (`tests/Fixtures/sdk/sdk-server.json` there).
 
@@ -36,11 +33,11 @@ bun run vendor:protocol  # refresh src/protocol from ../protocol (or MIRAFIVE_PR
 - Test fixtures in `test/fixtures/` come from mirafive/protocol, copied unchanged, their
   sha256 pinned in `test/protocol.test.ts`. Never edit them. Every batch a test emits is
   validated against `batch.schema.json`.
-- Bundle size is the headline goal (min + gzip, shared chunk included; limits are measured
-  + ~3 %, `./flags` capped at 4 kB), but robustness wins over bytes: reads never throw, errors reach
+- Bundle size is the headline goal (min + gzip; limits are measured
+  + ~3 %), but robustness wins over bytes: reads never throw, errors reach
   `onError`. A change that grows an entry explains why. No runtime dependencies.
 - WinterTC APIs only: no `node:` imports, no `process`, no DOM. `test:runtimes` proves it.
-- Each feature is its own entry point; `sideEffects: false` must stay true.
+- `sideEffects: false` must stay true.
 - Transport failures never throw into the caller's code (API.md, shared rules).
 - A secret key never reaches browser code; `new Mira()` refuses to run in a browser.
 - Comments only for a non-obvious constraint, one or two lines.

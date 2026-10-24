@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking:** feature flags and A/B experiments are removed. The
+  `@mirafive/sdk-server/flags` entry point (`MiraFlags`, `UserFlags`, `bootstrapHeaders`,
+  flag evaluation, exposures, SSR bootstrap and flag consent) no longer exists, and the `flags` size budget goes with it. Importing
+  `@mirafive/sdk-server/flags` now fails. Events, `identify()`, `send()`, consent modes
+  and retries are unchanged.
+
 ## 1.0.0 — 2026-09-27
 
 Rebuilt from scratch on the v1 ingest protocol and the v1 flag spec.

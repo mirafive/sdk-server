@@ -16,7 +16,7 @@ export interface MiraErrorInit {
   readonly cause?: unknown
 }
 
-/** Why a delivery or a flag request failed. `retryable` says whether the SDK would try again. */
+/** Why a delivery failed. `retryable` says whether the SDK would try again. */
 export class MiraError extends Error {
   override readonly name = "MiraError"
   readonly retryable: boolean

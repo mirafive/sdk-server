@@ -1,27 +1,18 @@
-import * as flags from "../../dist/flags.js"
 import * as sdk from "../../dist/index.js"
 import { smoke } from "./smoke.mjs"
 
-// One of each per isolate, as the README recommends for Workers.
+// One client per isolate, as the README recommends for Workers.
 let shared
 
 export async function reuse(url, ctx) {
   const host = url.searchParams.get("host")
-  const key = "mf_smoke000_reuse"
+  const user = url.searchParams.get("user")
 
-  shared ??= (() => {
-    const mira = new sdk.Mira({ key, host })
+  shared ??= new sdk.Mira({ key: "mf_smoke000_reuse", host })
+  shared.track("page", { userId: user })
+  ctx.waitUntil(shared.flush())
 
-    return { mira, flags: new flags.MiraFlags({ key, host, mira }) }
-  })()
-
-  const waitUntil = (promise) => ctx.waitUntil(promise)
-  const user = await shared.flags.for({ userId: url.searchParams.get("user") }, { waitUntil })
-
-  shared.mira.track("page", { userId: url.searchParams.get("user") })
-  ctx.waitUntil(shared.mira.flush())
-
-  return `${user.variant("pricing")} ${user.enabled("checkout")}`
+  return user
 }
 
 // oxlint-disable-next-line import/no-default-export -- the Workers module format
@@ -35,7 +26,7 @@ export default {
       }
 
       return new Response(
-        await smoke(sdk, flags, url.searchParams.get("host"), "workerd", (promise) => ctx.waitUntil(promise))
+        await smoke(sdk, url.searchParams.get("host"), "workerd", (promise) => ctx.waitUntil(promise))
       )
     } catch (error) {
       return new Response(String(error?.stack ?? error), { status: 500 })

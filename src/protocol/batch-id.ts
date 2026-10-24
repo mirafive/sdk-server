@@ -1,4 +1,4 @@
-// Vendored from mirafive/protocol 5037788489cb. Do not edit; run bun run vendor:protocol.
+// Vendored from mirafive/protocol b1346ccb992a. Do not edit; run bun run vendor:protocol.
 export const batchIdFor = async (key: string): Promise<string> => {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`mirafive:batch:${key}`))
   const hex = Array.from(new Uint8Array(digest, 0, 16), (byte, index) =>

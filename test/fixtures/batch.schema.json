@@ -126,7 +126,7 @@
               "pattern": "^[^$]"
             },
             {
-              "enum": ["$pageview", "$autocapture", "$identify", "$search", "$exposure", "$install_check"]
+              "enum": ["$pageview", "$autocapture", "$identify", "$search", "$install_check", "$exposure"]
             }
           ]
         },
